@@ -13,48 +13,31 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Quick)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick)
 
 set(PROJECT_SOURCE_DIR Source)
-set(PROJECT_QML_DIR Qml)
 
-set(PROJECT_SOURCES
-        ${PROJECT_SOURCE_DIR}/Main.cpp
-        ${PROJECT_SOURCE_DIR}/LifeEngine.h
-        ${PROJECT_SOURCE_DIR}/LifeEngine.cpp
-        ${PROJECT_SOURCE_DIR}/LifeQuickItem.h
-        ${PROJECT_SOURCE_DIR}/LifeQuickItem.cpp
-        ${PROJECT_QML_DIR}/Qml.qrc
-)
+file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/*.h)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/*.cpp)
+
+set(QML_SOURCES Qml/Qml.qrc)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(LifeGame
         MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
+        ${HEADERS}
+        ${SOURCES}
+        ${QML_SOURCES}
     )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET LifeGame APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
-    if(ANDROID)
-        add_library(LifeGame SHARED
-            ${PROJECT_SOURCES}
-        )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(LifeGame
-          ${PROJECT_SOURCES}
-        )
-    endif()
+    add_executable(LifeGame
+        ${HEADERS}
+        ${SOURCES}
+        ${QML_SOURCES}
+    )
 endif()
 
 target_link_libraries(LifeGame
   PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick)
 
 set_target_properties(LifeGame PROPERTIES
-    MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
 
